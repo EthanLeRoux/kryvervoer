@@ -2,12 +2,6 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, doc, query, where, getDocs, updateDoc, deleteDoc, Timestamp, serverTimestamp, orderBy } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updateEmail as fbUpdateEmail, updatePassword as fbUpdatePassword } from "firebase/auth";
 
-// Debug environment variables
-console.log("Environment check:", {
-    hasApiKey: !!import.meta.env.VITE_API_KEY,
-    hasProjectId: !!import.meta.env.VITE_PROJECT_ID,
-    env: import.meta.env.MODE
-});
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_API_KEY,
@@ -19,11 +13,6 @@ const firebaseConfig = {
     measurementId: import.meta.env.VITE_MEASUREMENT_ID
 };
 
-// Validate config
-if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-    console.error("Missing Firebase configuration. Please check your environment variables.");
-    throw new Error("Firebase configuration is incomplete.");
-}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -33,38 +22,14 @@ export const db = getFirestore(app);
 export const auth = getAuth(app); // Export auth so other components can use it
 
 // Enhanced signUpUser with better error handling
-export async function signUpUser(email, password) {
+export async function signUpUser(email, password,role,firstName,lastName) {
     try {
-        console.log("Attempting to sign up user:", email);
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        console.log("User signed up successfully:", userCredential.user.uid);
+        const userData = await saveDoc({ email: email, uid: userCredential.user.uid,role:role,firstName:firstName,lastName:lastName }, "users");
+        
         return userCredential.user;
     } catch (error) {
-        console.error("Sign up failed:", error.code, error.message);
-
-        // User-friendly error messages
-        let errorMessage = "Sign up failed: ";
-        switch (error.code) {
-            case 'auth/email-already-in-use':
-                errorMessage += "This email is already registered.";
-                break;
-            case 'auth/invalid-email':
-                errorMessage += "Please enter a valid email address.";
-                break;
-            case 'auth/weak-password':
-                errorMessage += "Password should be at least 6 characters.";
-                break;
-            case 'auth/network-request-failed':
-                errorMessage += "Network error. Please check your connection.";
-                break;
-            case 'auth/api-key-not-valid':
-                errorMessage += "Configuration error. Please contact support.";
-                break;
-            default:
-                errorMessage += error.message;
-        }
-
-        alert(errorMessage);
+        console.error("Sign up failed:", error.message);
         throw error;
     }
 }

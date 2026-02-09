@@ -12,6 +12,7 @@ export default function SignUp() {
     const [role, setRole] = useState("Parent");
     const [modalOpen, setModalOpen] = useState(false);
     const navigate = useNavigate();
+    const [message,setMessage] = useState("");
 
     const handleFormSubmit = async (event) => {
         event.preventDefault();
@@ -20,11 +21,8 @@ export default function SignUp() {
         if (password.length < 6) return alert("Password must be at least 6 characters.");
         if (password !== confirmPassword) return alert("Passwords do not match.");
 
-        const userData = { emailAddress, firstName, lastName, role };
-
         try {
-            await signUpUser(emailAddress, password);
-            await saveDoc(userData, "user-data");
+            await signUpUser(emailAddress, password,role,firstName,lastName);
 
             setEmailAddress("");
             setFirstName("");
@@ -33,10 +31,12 @@ export default function SignUp() {
             setConfirmPassword("");
             setRole("Parent");
 
+            setMessage("Signup successful!");
             setModalOpen(true);
         } catch (error) {
             console.error("Signup failed:", error);
-            alert("Error signing up. Please try again.");
+            setMessage("Error signing up. Please try again.");
+            setModalOpen(true);
         }
     };
 
@@ -107,7 +107,7 @@ export default function SignUp() {
                     setModalOpen(false);
                     navigate('/login');
                 }}
-                message="Signup successful"
+                message={message}
             />
 
             <input
