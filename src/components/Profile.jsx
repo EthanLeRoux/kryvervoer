@@ -30,10 +30,10 @@ export default function Profile() {
                 setUserData(userData);
                 
                 // Check if profile is incomplete
-                if (userData.profileComplete === false) {
+                if (userData.locationSet === false || userData.pfpSet === false) {
                     setMessage('Please complete your profile by uploading an image of yourself and providing a rough estimation of where you live. This will be used to show drivers nearby.');
                     setShowIncompleteProfileModal(true);
-                    navigate("/location");
+                   // navigate("/location");
                 }
             } catch (error) {
                 console.error("Error parsing user data:", error);
@@ -60,7 +60,8 @@ export default function Profile() {
             if (file) {
                 // Validate file size (5MB max)
                 if (file.size > 5 * 1024 * 1024) {
-                    alert('File size must be less than 5MB');
+                    setMessage('File size must be less than 5MB');
+                    setShowIncompleteProfileModal(true);
                     return;
                 }
                 
@@ -76,13 +77,15 @@ export default function Profile() {
                     sessionStorage.setItem("userData", JSON.stringify([updatedUserData]));
                     
                     // Update Firebase database
-                    await updateDocument("user-data", userData.id, { image64: base64 });
+                    await updateDocument("users", userData.id, { image64: base64, pfpSet: true });
                     
                     console.log('Profile picture updated successfully');
-                    alert('Profile picture updated successfully!');
+                    setMessage('Profile picture updated successfully!');
+                    setShowIncompleteProfileModal(true);
                 } catch (error) {
                     console.error('Error updating profile picture:', error);
-                    alert('Failed to update profile picture. Please try again.');
+                    setMessage('Failed to update profile picture. Please try again.');
+                    setShowIncompleteProfileModal(true);
                 }
             }
         };
@@ -100,6 +103,10 @@ export default function Profile() {
 
     const handleEditProfile = () => {
         navigate("/edit-profile");
+    };
+
+    const handleEditLocation = () => {
+        navigate("/location");
     };
 
     const handleDeleteAccount = () => {
@@ -185,6 +192,12 @@ export default function Profile() {
                         className="profileButton editButton"
                     >
                         Edit Profile
+                    </button>
+                    <button 
+                        onClick={handleEditLocation} 
+                        className="profileButton editButton"
+                    >
+                        Edit Location
                     </button>
                     <button 
                         onClick={handleLogout} 
