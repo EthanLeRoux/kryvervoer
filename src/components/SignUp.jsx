@@ -73,7 +73,7 @@ export default function SignUp() {
             width: '100%',
             padding: '0.75rem',
             fontSize: '1rem',
-            backgroundColor: '#000000ff',
+            backgroundColor: '#FFA500',
             color: '#fff',
             border: 'none',
             borderRadius: '50px',
@@ -183,15 +183,11 @@ export default function SignUp() {
                 type="submit"
                 value="Sign Up"
                 style={styles.taskAddButton}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#005fa3'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#000000ff'}
             />
 
             <Link
                 to="/login"
                 style={styles.linkButton}
-                onMouseOver={(e) => e.currentTarget.style.color = '#005fa3'}
-                onMouseOut={(e) => e.currentTarget.style.color = '#000000ff'}
             >
                 Already have an account? Login
             </Link>

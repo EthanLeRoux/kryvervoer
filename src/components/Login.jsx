@@ -7,6 +7,8 @@ export default function Login() {
     const [userEmail, setUserEmail] = useState("");
     const [userPassword, setUserPassword] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
+    const [message, setMessage] = useState("");
+
     const navigate = useNavigate();
 
     const handleFormSubmit = async (e) => {
@@ -17,34 +19,23 @@ export default function Login() {
         }
 
         try {
-            console.log("Step 1: Attempting Firebase Auth login...");
             const userData = await loginUser(userEmail, userPassword);
             console.log("Firebase Auth successful:", userData.email);
-            
-            console.log("Step 2: Querying Firestore for user data...");
-            const realUserData = await getDocumentsByField("user-data", "emailAddress", userData.email);
-            console.log("Firestore query result:", realUserData);
-            console.log("Result length:", realUserData.length);
-            console.log("First user object:", realUserData[0]);
-            console.log("User object keys:", realUserData[0] ? Object.keys(realUserData[0]) : "No data");
+            const realUserData = await getDocumentsByField("users", "email", userData.email);
             
             if (realUserData.length === 0) {
-                console.error("No user data found in Firestore!");
-                alert("No user data found. Please sign up first or contact support.");
+                setMessage("No user data found for this account. Please sign up first.");
+                setModalOpen(true);
                 return;
             }
-            
-            console.log("Step 3: Storing data in session storage...");
+
             sessionStorage.setItem("userData", JSON.stringify(realUserData));
-            console.log("Data stored in session storage");
-            
-            console.log("Step 4: Navigating to profile...");
             setModalOpen(true);
             navigate('/profile');
         } catch (error) {
             console.error("Login failed:", error);
-            console.error("Error details:", error.message);
-            alert("Login failed: " + error.message);
+            setMessage("Login failed. Please check your credentials and try again.");
+            setModalOpen(true);
         }
     };
 
@@ -68,7 +59,7 @@ export default function Login() {
             width: '100%',
             padding: '0.75rem 1rem',
             fontSize: '1rem',
-            border: '1px solid #ccc',
+            border: '1px solid #FFA500',
             borderRadius: '50px',
             outline: 'none',
             transition: 'border-color 0.3s, box-shadow 0.3s',
@@ -77,7 +68,7 @@ export default function Login() {
             width: '100%',
             padding: '0.75rem',
             fontSize: '1rem',
-            backgroundColor: '#000000ff',
+            backgroundColor: '#FFA500',
             color: '#fff',
             border: 'none',
             borderRadius: '50px',
@@ -90,7 +81,7 @@ export default function Login() {
             textAlign: 'center',
             color: '#000000ff',
             fontSize: '0.9rem',
-            textDecoration: 'none',
+            textDecoration: 'underline',
             transition: 'color 0.3s'
         }
     };
@@ -105,7 +96,7 @@ export default function Login() {
                     setModalOpen(false);
                     navigate("/login");
                 }}
-                message="Login successful"
+                message={message}
             />
 
             <input
@@ -130,15 +121,11 @@ export default function Login() {
                 type="submit"
                 value="Login"
                 style={styles.taskAddButton}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#005fa3'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#000000ff'}
             />
 
             <Link
                 to="/signup"
                 style={styles.linkButton}
-                onMouseOver={(e) => e.currentTarget.style.color = '#005fa3'}
-                onMouseOut={(e) => e.currentTarget.style.color = '#000000ff'}
             >
                 Don't have an account? Click here to sign up
             </Link>
