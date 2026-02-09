@@ -17,7 +17,7 @@ import FileTicket from "./components/FileTicket.jsx";
 import ViewTickets from "./components/ViewTickets.jsx";
 import DriverReporting from "./components/DriverReporting.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
-
+import LocationPicker from "./components/LocationPicker.jsx";
 
 
 function App() {
@@ -38,6 +38,7 @@ function App() {
                 <Route path="/finddriver" element={<MapWithPoints/>}/>
                 <Route path="/reviews/:id" element={<DriverReview />} />
                 <Route path="/reviews" element={<AllReview />} />
+                <Route path="/location" element={<LocationPicker/>} />
                 {/* Fixed the route path to match your navigation */}
                 <Route path="/reportdriver/:id" element={<DriverReporting />} />
                <Route path="/messagedriver/:driverId/:parentId" element={<ChatPage />} />

@@ -3,39 +3,38 @@ import { useNavigate } from "react-router-dom";
 import '../assets/styles/App.css';
 import '../assets/styles/Profile.css';
 import { updateDocument } from '../firebase/firebase.js';
+import MessageModal from "../modals/MessageModal.jsx";
 
 export default function Profile() {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const [message, setMessage] = useState("");
+    const [showIncompleteProfileModal, setShowIncompleteProfileModal] = useState(false);
 
     useEffect(() => {
-        console.log("Profile: Checking session storage...");
         const storedUserData = sessionStorage.getItem("userData");
-        console.log("Raw session storage data:", storedUserData);
         
         if (storedUserData) {
             try {
                 const parsedData = JSON.parse(storedUserData);
-                console.log("Parsed user data:", parsedData);
-                console.log("Data type:", Array.isArray(parsedData) ? "Array" : typeof parsedData);
-                console.log("Array length:", Array.isArray(parsedData) ? parsedData.length : "N/A");
                 
                 const userData = parsedData[0];
-                console.log("First element:", userData);
                 
                 if (!userData) {
                     console.error("No user data found at index 0");
                     navigate("/login");
                     return;
                 }
-                
-                console.log("Setting user data:", userData);
-                console.log("User data fields:", userData ? Object.keys(userData) : "No data");
-                console.log("User role:", userData?.role);
-                console.log("User firstName:", userData?.firstName);
-                console.log("User lastName:", userData?.lastName);
+
                 setUserData(userData);
+                
+                // Check if profile is incomplete
+                if (userData.profileComplete === false) {
+                    setMessage('Please complete your profile by uploading an image of yourself and providing a rough estimation of where you live. This will be used to show drivers nearby.');
+                    setShowIncompleteProfileModal(true);
+                    navigate("/location");
+                }
             } catch (error) {
                 console.error("Error parsing user data:", error);
                 navigate("/login");
@@ -132,7 +131,13 @@ export default function Profile() {
     }
 
     return (
-        <div className="profileContainer">
+        <>
+            <MessageModal 
+                isOpen={showIncompleteProfileModal}
+                onClose={() => setShowIncompleteProfileModal(false)}
+                message={message}
+            />
+            <div className="profileContainer">
             <div className="profileCard">
                 <div className="profileHeader">
                     <div className="profileImage">
@@ -208,5 +213,7 @@ export default function Profile() {
                 </div>
             </div>
         </div>
+        </>
     );
+
 }

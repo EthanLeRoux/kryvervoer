@@ -20,7 +20,6 @@ export default function Login() {
 
         try {
             const userData = await loginUser(userEmail, userPassword);
-            console.log("Firebase Auth successful:", userData.email);
             const realUserData = await getDocumentsByField("users", "email", userData.email);
             
             if (realUserData.length === 0) {
@@ -30,6 +29,7 @@ export default function Login() {
             }
 
             sessionStorage.setItem("userData", JSON.stringify(realUserData));
+            setMessage("Login successful!");
             setModalOpen(true);
             navigate('/profile');
         } catch (error) {
