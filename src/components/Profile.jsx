@@ -153,9 +153,6 @@ export default function Profile() {
                             alt="Profile" 
                             className="profilePic"
                         />
-                        <button onClick={handleProfilePicChange} className="changePicButton">
-                            Change Profile Picture
-                        </button>
                     </div>
                     <h1 className="profileName">
                         {userData.firstName} {userData.lastName}
@@ -168,7 +165,7 @@ export default function Profile() {
                         <h3>Personal Information</h3>
                         <div className="infoItem">
                             <span className="infoLabel">Email:</span>
-                            <span className="infoValue">{userData.emailAddress}</span>
+                            <span className="infoValue">{userData.email || userData.emailAddress || 'Not provided'}</span>
                         </div>
                         <div className="infoItem">
                             <span className="infoLabel">First Name:</span>
@@ -182,17 +179,26 @@ export default function Profile() {
                             <span className="infoLabel">Role:</span>
                             <span className="infoValue">{userData.role}</span>
                         </div>
+                        <div className="infoItem">
+                            <span className="infoLabel">Location:</span>
+                            <span className="infoValue">
+                                {userData.locationAddress || (userData.latitude && userData.longitude ? `${userData.latitude.toFixed ? userData.latitude.toFixed(4) : userData.latitude}, ${userData.longitude.toFixed ? userData.longitude.toFixed(4) : userData.longitude}` : 'Not provided')}
+                            </span>
+                        </div>
                     </div>
 
                 </div>
 
-                <div className="profileActions">
+                <div className="profileActions" style={{display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px'}}>
                     <button 
                         onClick={handleEditProfile} 
                         className="profileButton editButton"
                     >
                         Edit Profile
                     </button>
+                    <button onClick={handleProfilePicChange} className="profileButton editButton">
+                            Change Profile Picture
+                        </button>
                     <button 
                         onClick={handleEditLocation} 
                         className="profileButton editButton"

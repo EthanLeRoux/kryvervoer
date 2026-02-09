@@ -39,6 +39,20 @@ export default function LocationPicker({ onLocationChange }) {
         if (typeof onLocationChange === 'function') onLocationChange(coords);
     }, [onLocationChange]);
 
+    const reverseGeocodeLocation = async (lat, lng) => {
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+                { headers: { 'User-Agent': 'kryvervoer-app' } }
+            );
+            const data = await response.json();
+            return data.display_name || 'Location set';
+        } catch (error) {
+            console.error('Reverse geocoding error:', error);
+            return 'Location set (address not available)';
+        }
+    };
+
     const useBrowserLocation = () => {
         if (!navigator.geolocation) {
             setModalMessage('Geolocation not available in this browser');
@@ -78,10 +92,14 @@ export default function LocationPicker({ onLocationChange }) {
                 return;
             }
 
-            // Update database with location
+            // Reverse geocode to get address
+            const address = await reverseGeocodeLocation(location.lat, location.lng);
+
+            // Update database with location and address
             await updateDocument('users', userData.id, {
                 latitude: location.lat,
                 longitude: location.lng,
+                locationAddress: address,
                 locationSet: true
             });
 
@@ -89,7 +107,7 @@ export default function LocationPicker({ onLocationChange }) {
             setShowModal(true);
             
             // Update session storage
-            const updatedUserData = { ...userData, latitude: location.lat, longitude: location.lng,locationSet:true };
+            const updatedUserData = { ...userData, latitude: location.lat, longitude: location.lng, locationAddress: address, locationSet:true };
             sessionStorage.setItem('userData', JSON.stringify([updatedUserData]));
             sessionStorage.setItem('selectedLocation', JSON.stringify(location));
 
