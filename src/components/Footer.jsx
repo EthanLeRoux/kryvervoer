@@ -10,7 +10,7 @@ const Footer = () => {
                 <Link to="/drivers">Drivers</Link>
                 <Link to="/privacy">Privacy Policy</Link>
             </div>
-            <p>&copy; {new Date().getFullYear()} EduTransit. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} KryVervoer. All rights reserved.</p>
         </footer>
     );
 };
