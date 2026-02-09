@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../assets/styles/Navigation.css';
-import { FaTaxi, FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaTimes } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const Navigation = () => {
@@ -14,7 +14,7 @@ const Navigation = () => {
   useEffect(() => {
     const storedUser = JSON.parse(sessionStorage.getItem("userData")) || {};
     const user = Array.isArray(storedUser) ? storedUser[0] : storedUser;
-    setUserid(user.id || "");
+    setUserid(user.uid || "");
     }, []);
 
 
@@ -24,7 +24,7 @@ const Navigation = () => {
         {/* Left side: Logo/Title */}
         <div className="nav-logo">
           <Link to="/" className="nav-logo-link">
-            <FaTaxi className="nav-logo-icon" />
+            <img src="/K.png" alt="KryVervoer" className="nav-logo-icon" style={{ width: '50px', height: '50px' }} />
             <span className="nav-logo-text">KryVervoer</span>
           </Link>
         </div>
@@ -40,7 +40,7 @@ const Navigation = () => {
 
         <div className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
             {
-                userid?<div>          
+                !userid?<div>          
                     <Link to="/login" className="nav-link">Login</Link>
                     <Link to="/signup" className="nav-link">Signup</Link>
                 </div>:

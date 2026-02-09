@@ -9,21 +9,22 @@ export default function MainSection() {
     return (
         <div className="main-container">
             <div className="main-text">
-                <h1>EDUTRANSIT</h1>
                 <p>
-                    EduTransit helps parents quickly find safe and trusted school transport options for their children, or register their vehicle with ease.
-                    We connect parents with reliable drivers to ensure peace of mind during daily school commutes.
-                    Whether you're a parent looking for dependable transport or a driver ready to offer services, you're in the right place.
-                    Join our growing network and experience a smarter way to manage school transportation.
+                    KryVervoer makes school transport simple and secure.
+                    Find trusted drivers for your child's daily school commute — all in one place.
+
+                    Whether you’re a parent looking for safe, reliable transport or a driver offering school transport services, Kryvervoer connects you with ease.
+
+                    Join a growing network focused on safety, trust, and peace of mind.
                 </p>
                 <div className="main-buttons">
-                    <button onClick={() => navigate("/finddriver")}>Find Transport</button>
+                    <button onClick={() => navigate("/finddriver")}>Find a driver</button>
                 </div>
             </div>
 
-            <div className="main-image">
+            {/* <div className="main-image">
                 <img src={SchoolBus} alt="SchoolBus Illustration" />
-            </div>
+            </div> */}
         </div>
     );
 }
