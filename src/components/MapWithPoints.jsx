@@ -87,7 +87,6 @@ return ( <div style={styles.container}> <div style={styles.scrollArea}>
 );
 };
 
-// 💅 Inline styles
 const styles = {
 container: {
 display: "flex",
@@ -135,32 +134,6 @@ fontSize: "12px",
 color: "#777",
 },
 };
-
-// const styles = {
-//   container: {
-//     display: "flex",
-//     flexDirection: "column",
-//     gap: "15px",
-//     padding: "20px",
-//   },
-//   card: {
-//     border: "1px solid #ddd",
-//     borderRadius: "10px",
-//     padding: "15px",
-//     backgroundColor: "#fff",
-//     boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-//   },
-//   name: {
-//     marginBottom: "5px",
-//   },
-//   comment: {
-//     margin: "8px 0",
-//     fontStyle: "italic",
-//   },
-//   timestamp: {
-//     color: "#777",
-//   },
-// };
 
 export default function MapWithPoints() {
     const [selectedPoint, setSelectedPoint] = useState(null);
@@ -288,33 +261,11 @@ useEffect(() => {
                                     />
                                 </Tooltip>
                             </Marker>
-                    // <Marker
-                    // key={point.id}
-                    // position={[point.lat, point.lng]}
-                    // eventHandlers={{
-                    //     click: () => setSelectedPoint(point),
-                    //     mouseover: () => setHoveredDriver(point),
-                    //     mouseout: () => setHoveredDriver(null),
-                    // }}
-                    // >
-                    // <Tooltip
-                    //     direction="top"
-                    //     offset={[0, -10]}
-                    //     opacity={1}
-                    //     permanent={hoveredDriver?.id === point.id} 
-                    // >
-                    //     <DriverCard
-                    //     name={point.name}
-                    //     profilePic={point.profilePic}
-                    //     />
-                    // </Tooltip>
-                    // </Marker>
-
 
                         ))}
                     </MapContainer>
 
-                    <ul style={{
+                    {/* <ul style={{
                         listStyle: "none",
                         padding: 0,
                         marginTop: "1rem",
@@ -360,7 +311,7 @@ useEffect(() => {
                                 </div>
                             </li>
                         ))}
-                    </ul>
+                    </ul> */}
                 </div>
 
                 <div className="detailView" style={{
