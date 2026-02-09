@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../assets/styles/Navigation.css';
-import { FaSchool, FaBars, FaTimes } from "react-icons/fa";
+import { FaTaxi, FaBars, FaTimes } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const Navigation = () => {
@@ -24,8 +24,8 @@ const Navigation = () => {
         {/* Left side: Logo/Title */}
         <div className="nav-logo">
           <Link to="/" className="nav-logo-link">
-            <FaSchool className="nav-logo-icon" />
-            <span className="nav-logo-text">EDUTRANSIT</span>
+            <FaTaxi className="nav-logo-icon" />
+            <span className="nav-logo-text">KryVervoer</span>
           </Link>
         </div>
 
