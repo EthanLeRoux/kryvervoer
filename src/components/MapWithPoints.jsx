@@ -72,7 +72,7 @@ export default function MapWithPoints() {
 
         console.log("drivers:", drivers);
         console.log("users:", users);
-        
+
         const merged = drivers
           .map((driver) => {
             const user = users.find((u) => u.uid === driver.uid);
@@ -225,13 +225,13 @@ export default function MapWithPoints() {
               />
               <h3>{selectedPoint.name}</h3>
 
-              <p><strong>Vehicle:</strong> {selectedPoint.vehicle}</p>
-              <p><strong>Schools:</strong> {selectedPoint.schools.join(", ")}</p>
+              <p><strong>Vehicle Type:</strong> {selectedPoint.vehicle}</p>
+              <p><strong>Supported Schools:</strong> {selectedPoint.schools.join(", ")}</p>
               <p><strong>Vehicle Capacity:</strong> {selectedPoint.max_passengers}</p>
               <p><strong>Available Seats:</strong> {selectedPoint.available_seats}</p>
-              <p><strong>Price / Month:</strong> R{selectedPoint.price}</p>
-              <p><strong>Latitude:</strong> {selectedPoint.lat}</p>
-              <p><strong>Longitude:</strong> {selectedPoint.lng}</p>
+              <p><strong>Price per month:</strong> R{selectedPoint.price}</p>
+              {/* <p><strong>Latitude:</strong> {selectedPoint.lat}</p>
+              <p><strong>Longitude:</strong> {selectedPoint.lng}</p> */}
 
               <button onClick={handleMessageDriver} style={buttonStyle}>
                 Message Driver

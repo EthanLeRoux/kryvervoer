@@ -1,11 +1,220 @@
-import { useState,useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import MessageModal from "../modals/MessageModal.jsx";
-import schools from '../enums/Schools.json';
-import Select from 'react-select'
-import {saveDoc,getDocumentsByField,updateDocument, saveDriver} from '../firebase/firebase.js';
+import schools from "../enums/Schools.json";
+import languages from "../enums/Languages.json";
+import races from "../enums/Races.json";
+import Select from "react-select";
+import { getDocumentsByField, updateDocument, saveDriver } from "../firebase/firebase.js";
 
-    const styles = {
+export default function DriverProfileForm() {
+    const navigate = useNavigate();
+
+    const [availableSeats, setAvailableSeats] = useState(0);
+    const [vehicleCapacity, setVehicleCapacity] = useState(0);
+    const [pricePerMonth, setPricePerMonth] = useState(0);
+    const [vehicleType, setVehicleType] = useState("");
+    const [supportedSchools, setSupportedSchools] = useState([]);
+    const [selectedRace, setSelectedRace] = useState("");
+    const [selectedLanguages, setSelectedLanguages] = useState([]);
+
+    const [modalOpen, setModalOpen] = useState(false);
+    const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [userData, setUserData] = useState(null);
+
+    const vehicleTypes = ["Minibus", "SUV", "Sedan"];
+
+    // Convert enums to react-select format
+    const schoolOptions = schools.map(s => ({ value: s, label: s }));
+    const raceOptions = races.map(r => ({ value: r, label: r }));
+    const languageOptions = languages.map(l => ({ value: l, label: l }));
+
+    useEffect(() => {
+        const storedUserData = sessionStorage.getItem("userData");
+
+        if (storedUserData) {
+            try {
+                const parsedData = JSON.parse(storedUserData);
+                const user = parsedData[0];
+
+                if (!user) {
+                    navigate("/login");
+                    return;
+                }
+
+                setUserData(user);
+            } catch (error) {
+                console.error("Error parsing user data:", error);
+                navigate("/login");
+            }
+        }
+
+        setLoading(false);
+    }, [navigate]);
+
+    const handleFormSubmit = async (event) => {
+        event.preventDefault();
+
+        if (!userData?.uid) {
+            setMessage("Session expired. Please login again.");
+            setModalOpen(true);
+            return;
+        }
+
+        if (!vehicleType || !selectedRace || supportedSchools.length === 0) {
+            setMessage("Please complete all required fields.");
+            setModalOpen(true);
+            return;
+        }
+
+        try {
+            await saveDriver({
+                uid: userData.uid,
+                availableSeats: Number(availableSeats),
+                vehicleCapacity: Number(vehicleCapacity),
+                vehicleType,
+                supportedSchools,
+                pricePerMonth: Number(pricePerMonth),
+                race: selectedRace,
+                languages: selectedLanguages,
+            });
+
+            const res = await getDocumentsByField("users", "uid", userData.uid);
+
+            if (res.length > 0) {
+                const userDocId = res[0].id;
+                await updateDocument("users", userDocId, { driverProfileSet: true });
+
+                sessionStorage.setItem(
+                    "userData",
+                    JSON.stringify([{ ...userData, driverProfileSet: true }])
+                );
+            }
+
+            setMessage("Driver Registration successful!");
+            setModalOpen(true);
+
+        } catch (error) {
+            console.error("Registration failed:", error);
+            setMessage("Error registering driver. Please try again.");
+            setModalOpen(true);
+        }
+    };
+
+    if (loading) return null;
+
+    return (
+        <>
+            <form onSubmit={handleFormSubmit} style={styles.formArea}>
+                <h1 style={styles.heading}>Driver Registration</h1>
+
+                <MessageModal
+                    isOpen={modalOpen}
+                    onClose={() => {
+                        setModalOpen(false);
+                        navigate("/profile");
+                    }}
+                    message={message}
+                />
+
+                {/* Available Seats */}
+                <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Available Seats</label>
+                    <input
+                        type="number"
+                        value={availableSeats}
+                        onChange={(e) => setAvailableSeats(Number(e.target.value))}
+                        min="0"
+                        required
+                        style={styles.inputText}
+                    />
+                </div>
+
+                {/* Vehicle Capacity */}
+                <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Vehicle Capacity</label>
+                    <input
+                        type="number"
+                        value={vehicleCapacity}
+                        onChange={(e) => setVehicleCapacity(Number(e.target.value))}
+                        min="1"
+                        required
+                        style={styles.inputText}
+                    />
+                </div>
+
+                {/* Vehicle Type */}
+                <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Vehicle Type</label>
+                    <Select
+                        options={vehicleTypes.map(type => ({ value: type, label: type }))}
+                        onChange={(option) => setVehicleType(option?.value || "")}
+                    />
+                </div>
+
+                {/* Supported Schools (Multi) */}
+                <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Supported Schools</label>
+                    <Select
+                        options={schoolOptions}
+                        isMulti
+                        onChange={(options) =>
+                            setSupportedSchools(
+                                options ? options.map(o => o.value) : []
+                            )
+                        }
+                    />
+                </div>
+
+                {/* Race (Single) */}
+                <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Race</label>
+                    <Select
+                        options={raceOptions}
+                        onChange={(option) => setSelectedRace(option?.value || "")}
+                    />
+                </div>
+
+                {/* Languages (Multi) */}
+                <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Languages Spoken</label>
+                    <Select
+                        options={languageOptions}
+                        isMulti
+                        onChange={(options) =>
+                            setSelectedLanguages(
+                                options ? options.map(o => o.value) : []
+                            )
+                        }
+                    />
+                </div>
+
+                {/* Price */}
+                <div style={styles.fieldGroup}>
+                    <label style={styles.label}>Price Per Month (ZAR)</label>
+                    <input
+                        type="number"
+                        value={pricePerMonth}
+                        onChange={(e) => setPricePerMonth(Number(e.target.value))}
+                        min="0"
+                        required
+                        style={styles.inputText}
+                    />
+                </div>
+
+                <input
+                    type="submit"
+                    value="Save Driver Profile"
+                    style={styles.taskAddButton}
+                />
+            </form>
+        </>
+    );
+}
+
+
+const styles = {
         formArea: {
             width: '100%',
             maxWidth: 400,
@@ -72,179 +281,3 @@ fieldGroup: {
             transition: 'color 0.3s'
         }
     };
-
-export default function DriverProfileForm(){
-    const [availableSeats, setAvailableSeats] = useState(0);
-    const [vehicleCapacity, setVehicleCapacity] = useState(0);
-    const [pricePerMonth, setPricePerMonth] = useState(0);
-    const [vehicleType, setVehicleType] = useState("");
-    const [supportedSchools, setSupportedSchools] = useState([]);
-    const [modalOpen, setModalOpen] = useState(false);
-    const vehicleTypes = ["Minibus", "SUV", "Sedan"];
-    // const schools = schools;
-    const options = schools.map(school => ({ value: school, label: school }));
-
-    const navigate = useNavigate();
-    const [message,setMessage] = useState("");
-    const [loading, setLoading] = useState(true);
-    const [userData, setUserData] = useState(null);
-
-        useEffect(() => {
-            const storedUserData = sessionStorage.getItem("userData");
-            
-            if (storedUserData) {
-                try {
-                    const parsedData = JSON.parse(storedUserData);
-                    
-                    const userData = parsedData[0];
-                    
-                    if (!userData) {
-                        console.error("No user data found at index 0");
-                        navigate("/login");
-                        return;
-                    }
-    
-                    setUserData(userData);
-                    
-                    
-                } catch (error) {
-                    console.error("Error parsing user data:", error);
-                    navigate("/login");
-                }
-            }
-            setLoading(false);
-        }, [navigate]);
-
-    const handleSchoolsChange = (selectedOptions) => {
-        const values = selectedOptions
-            ? selectedOptions.map(option => option.value)
-            : [];
-
-        setSupportedSchools(values);
-    };
-
-            const handleFormSubmit = async (event) => {
-                event.preventDefault();
-        
-                try {
-                    await saveDriver({
-                        uid:userData.uid,
-                        availableSeats: availableSeats,
-                        vehicleCapacity: vehicleCapacity,
-                        vehicleType: vehicleType,
-                        supportedSchools: supportedSchools,
-                        pricePerMonth: pricePerMonth,
-                    });
-
-                    await getDocumentsByField("users","uid",userData.uid).then(async (res)=>{
-                        const userDocId = res[0].id;
-                        await updateDocument("users", userDocId, { driverProfileSet: true });
-                        sessionStorage.setItem("userData", JSON.stringify([{ ...userData, driverProfileSet: true }]));
-                    });
-        
-                    setMessage("Driver Registration successful!");
-                    setModalOpen(true);
-                } catch (error) {
-                    console.error("Registration failed:", error);
-                    setMessage("Error registering driver. Please try again.");
-                    setModalOpen(true);
-                }
-            };
-
-    return(
-        <>
-        <form onSubmit={handleFormSubmit} style={styles.formArea}>
-    <h1 style={styles.heading}>Driver Registration</h1>
-
-    <MessageModal
-        isOpen={modalOpen}
-        onClose={() => {
-            setModalOpen(false);
-            navigate('/profile');
-        }}
-        message={message}
-    />
-
-    <div style={styles.fieldGroup}>
-        <label style={styles.label}>Available Seats</label>
-        <input
-            type="number"
-            value={availableSeats}
-            onChange={(e) => setAvailableSeats(e.target.value)}
-            placeholder="e.g. 3"
-            min="0"
-            required
-            style={styles.inputText}
-        />
-    </div>
-
-    <div style={styles.fieldGroup}>
-        <label style={styles.label}>Vehicle Capacity</label>
-        <input
-            type="number"
-            value={vehicleCapacity}
-            onChange={(e) => setVehicleCapacity(e.target.value)}
-            placeholder="e.g. 14"
-            min="1"
-            required
-            style={styles.inputText}
-        />
-    </div>
-
-    <div style={styles.fieldGroup}>
-        <label style={styles.label}>Vehicle Type</label>
-
-        <Select
-            options={vehicleTypes.map(type => ({
-                value: type,
-                label: type
-            }))}
-            value={
-                vehicleType
-                    ? { value: vehicleType, label: vehicleType }
-                    : null
-            }
-            onChange={(selectedOption) =>{
-                setVehicleType(selectedOption?.value || "")
-                }
-            }
-        />
-
-
-    </div>
-
-    <div style={styles.fieldGroup}>
-        <label style={styles.label}>Supported School</label>
-        <div style={styles.fieldGroup}>
-      <Select options={options}
-      isMulti
-      onChange={handleSchoolsChange}
-       />
-</div>
-
-    </div>
-
-    <div style={styles.fieldGroup}>
-        <label style={styles.label}>Price Per Month (ZAR)</label>
-        <input
-            type="number"
-            value={pricePerMonth}
-            onChange={(e) => setPricePerMonth(e.target.value)}
-            placeholder="e.g. 1200"
-            min="0"
-            required
-            style={styles.inputText}
-        />
-    </div>
-
-    <input
-        type="submit"
-        value="Save Driver Profile"
-        style={styles.taskAddButton}
-    />
-</form>
-
-
-                </>
-    );
-}
