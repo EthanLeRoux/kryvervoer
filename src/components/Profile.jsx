@@ -11,6 +11,7 @@ export default function Profile() {
     const navigate = useNavigate();
     const [message, setMessage] = useState("");
     const [showIncompleteProfileModal, setShowIncompleteProfileModal] = useState(false);
+    const [navigateLocation, setNavigateLocation] = useState("");
 
     useEffect(() => {
         const storedUserData = sessionStorage.getItem("userData");
@@ -31,14 +32,14 @@ export default function Profile() {
                 
                 // Check if profile is incomplete
                 if (userData.locationSet === false || userData.pfpSet === false) {
-                    if(userData.role === "Driver"){
-                        setMessage('Please complete your profile by uploading an image of yourself and providing a rough estimation of where you live. This will be used to show you nearby parents looking for drivers.');
-                        navigate("/driverform");
+                    if(userData.role === "Driver" && userData.driverProfileSet !== true){
+                        setMessage('Please complete the driver registration form to capture your driver details.');
+                        setNavigateLocation("/driverform");
+                        setShowIncompleteProfileModal(true);
                     }
                     else
                     setMessage('Please complete your profile by uploading an image of yourself and providing a rough estimation of where you live. This will be used to show drivers nearby.');
                     setShowIncompleteProfileModal(true);
-                   // navigate("/location");
                 }
             } catch (error) {
                 console.error("Error parsing user data:", error);
@@ -52,9 +53,20 @@ export default function Profile() {
     }, [navigate]);
 
     const handleLogout = () => {
-        sessionStorage.removeItem("userData");
-        navigate("/login");
-    };
+    const confirmed = window.confirm("Are you sure you want to logout?");
+
+    if (!confirmed) return;
+
+    // Clear session storage
+    sessionStorage.removeItem("userData");
+
+    // Clear local component state (optional but clean)
+    setUserData(null);
+
+    // Redirect and prevent back navigation
+    navigate("/login", { replace: true });
+};
+
 
     const handleProfilePicChange = () => {
         const input = document.createElement('input');
@@ -75,7 +87,7 @@ export default function Profile() {
                     const base64 = await convertToBase64(file);
                     
                     // Update userData with new profile picture
-                    const updatedUserData = { ...userData, image64: base64 };
+                    const updatedUserData = { ...userData, image64: base64, pfpSet: true };
                     setUserData(updatedUserData);
                     
                     // Update session storage
@@ -146,7 +158,12 @@ export default function Profile() {
         <>
             <MessageModal 
                 isOpen={showIncompleteProfileModal}
-                onClose={() => setShowIncompleteProfileModal(false)}
+                onClose={() => {
+                    setShowIncompleteProfileModal(false);
+                    if (navigateLocation) {
+                        navigate(navigateLocation);
+                    }
+                }}
                 message={message}
             />
             <div className="profileContainer">

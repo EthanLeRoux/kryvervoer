@@ -101,7 +101,11 @@ export async function updatePassword(newPassword) {
 
 export async function saveDoc(docData, collectionName) {
     try {
-        await addDoc(collection(db, collectionName), docData);
+       const data = await addDoc(collection(db, collectionName), docData);
+       if (data.id) {
+           console.log(`Document added to ${collectionName} with ID:`, data.id);
+           return data.id;
+       }
     } catch (error) {
         console.error("Error adding document: ", error);
         throw error;

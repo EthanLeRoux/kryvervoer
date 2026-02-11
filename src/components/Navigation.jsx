@@ -17,6 +17,10 @@ const Navigation = () => {
     setUserid(user.uid || "");
     }, []);
 
+const handleLogout = () => {
+        sessionStorage.removeItem("userData");
+        navigate("/login");
+    };
 
   return (
     <nav className="nav-container">
@@ -52,6 +56,12 @@ const Navigation = () => {
           <Link to="/chats" className="nav-link">Chats</Link>
           <Link to="/about" className="nav-link">About</Link>
           <Link to="/privacy" className="nav-link">Privacy</Link>
+          {
+            
+            userid?<div>
+              <button onClick={handleLogout} className="nav-link">Logout</button>
+            </div>:<div></div>
+          }
         </div>
       </div>
     </nav>

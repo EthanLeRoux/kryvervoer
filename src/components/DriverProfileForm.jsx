@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import MessageModal from "../modals/MessageModal.jsx";
 import schools from '../enums/Schools.json';
 import Select from 'react-select'
+import {saveDoc,getDocumentsByField,updateDocument} from '../firebase/firebase.js';
 
     const styles = {
         formArea: {
@@ -73,9 +74,9 @@ fieldGroup: {
     };
 
 export default function DriverProfileForm(){
-    const [availableSeats, setAvailableSeats] = useState("");
-    const [vehicleCapacity, setVehicleCapacity] = useState("");
-    const [pricePerMonth, setPricePerMonth] = useState("");
+    const [availableSeats, setAvailableSeats] = useState(0);
+    const [vehicleCapacity, setVehicleCapacity] = useState(0);
+    const [pricePerMonth, setPricePerMonth] = useState(0);
     const [vehicleType, setVehicleType] = useState("");
     const [supportedSchools, setSupportedSchools] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
@@ -125,25 +126,27 @@ export default function DriverProfileForm(){
             const handleFormSubmit = async (event) => {
                 event.preventDefault();
         
-                if (!role) return alert("Please select Parent or Driver.");
-                if (password.length < 6) return alert("Password must be at least 6 characters.");
-                if (password !== confirmPassword) return alert("Passwords do not match.");
-        
                 try {
-                    await signUpUser(emailAddress, password,role,firstName,lastName);
+                    await saveDoc({
+                        uid:userData.uid,
+                        availableSeats: availableSeats,
+                        vehicleCapacity: vehicleCapacity,
+                        vehicleType: vehicleType,
+                        supportedSchools: supportedSchools,
+                        pricePerMonth: pricePerMonth,
+                    },"drivers");
+
+                    await getDocumentsByField("users","uid",userData.uid).then(async (res)=>{
+                        const userDocId = res[0].id;
+                        await updateDocument("users", userDocId, { driverProfileSet: true });
+                        sessionStorage.setItem("userData", JSON.stringify([{ ...userData, driverProfileSet: true }]));
+                    });
         
-                    setEmailAddress("");
-                    setFirstName("");
-                    setLastName("");
-                    setPassword("");
-                    setConfirmPassword("");
-                    setRole("Parent");
-        
-                    setMessage("Signup successful!");
+                    setMessage("Driver Registration successful!");
                     setModalOpen(true);
                 } catch (error) {
-                    console.error("Signup failed:", error);
-                    setMessage("Error signing up. Please try again.");
+                    console.error("Registration failed:", error);
+                    setMessage("Error registering driver. Please try again.");
                     setModalOpen(true);
                 }
             };
@@ -151,13 +154,13 @@ export default function DriverProfileForm(){
     return(
         <>
         <form onSubmit={handleFormSubmit} style={styles.formArea}>
-    <h1 style={styles.heading}>Driver Information</h1>
+    <h1 style={styles.heading}>Driver Registration</h1>
 
     <MessageModal
         isOpen={modalOpen}
         onClose={() => {
             setModalOpen(false);
-            navigate('/login');
+            navigate('/profile');
         }}
         message={message}
     />
@@ -217,10 +220,6 @@ export default function DriverProfileForm(){
       isMulti
       onChange={handleSchoolsChange}
        />
-
-    <small style={{ marginLeft: '0.75rem', color: '#666' }}>
-        Hold Ctrl (Windows) or Cmd (Mac) to select multiple schools
-    </small>
 </div>
 
     </div>
