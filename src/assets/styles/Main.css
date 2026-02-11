@@ -42,7 +42,7 @@
 
 .main-buttons button {
     padding: 12px 24px;
-    background-color: #000;
+    background-color: #FFA500;
     color: #fff;
     font-size: 1rem;
     border: none;
@@ -52,7 +52,7 @@
 }
 
 .main-buttons button:hover {
-    background-color: #222;
+    background-color: #dd9001;
 }
 
 .main-image {

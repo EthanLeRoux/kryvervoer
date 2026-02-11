@@ -31,6 +31,11 @@ export default function Profile() {
                 
                 // Check if profile is incomplete
                 if (userData.locationSet === false || userData.pfpSet === false) {
+                    if(userData.role === "Driver"){
+                        setMessage('Please complete your profile by uploading an image of yourself and providing a rough estimation of where you live. This will be used to show you nearby parents looking for drivers.');
+                        navigate("/driverform");
+                    }
+                    else
                     setMessage('Please complete your profile by uploading an image of yourself and providing a rough estimation of where you live. This will be used to show drivers nearby.');
                     setShowIncompleteProfileModal(true);
                    // navigate("/location");

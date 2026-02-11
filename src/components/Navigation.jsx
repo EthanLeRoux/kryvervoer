@@ -49,6 +49,7 @@ const Navigation = () => {
 
           <Link to="/finddriver" className="nav-link">Find a Driver</Link>
           <Link to="/profile" className="nav-link">Profile</Link>
+          <Link to="/chats" className="nav-link">Chats</Link>
           <Link to="/about" className="nav-link">About</Link>
           <Link to="/privacy" className="nav-link">Privacy</Link>
         </div>

@@ -18,7 +18,7 @@ import ViewTickets from "./components/ViewTickets.jsx";
 import DriverReporting from "./components/DriverReporting.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
 import LocationPicker from "./components/LocationPicker.jsx";
-
+import DriverProfileForm from "./components/DriverProfileForm.jsx";
 
 function App() {
     return (
@@ -26,6 +26,7 @@ function App() {
             <Navigation></Navigation>
             <Routes>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/driverform" element={<DriverProfileForm />} />
                 <Route path="/tickets" element={<FileTicket />} />
                 <Route path="/tickets/view" element={<ViewTickets />} />
                 <Route path="/profile" element={<Profile/>}/>
