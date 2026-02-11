@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, doc, query, where, getDocs, updateDoc, deleteDoc, Timestamp, serverTimestamp, orderBy } from "firebase/firestore";
+import { getFirestore, collection, addDoc, doc, query, where, getDocs, updateDoc, deleteDoc, Timestamp, serverTimestamp, orderBy, setDoc } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updateEmail as fbUpdateEmail, updatePassword as fbUpdatePassword } from "firebase/auth";
 
 
@@ -25,7 +25,7 @@ export const auth = getAuth(app); // Export auth so other components can use it
 export async function signUpUser(email, password,role,firstName,lastName) {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const userData = await saveDoc({ email: email, uid: userCredential.user.uid,role:role,firstName:firstName,lastName:lastName,locationSet:false,pfpSet:false }, "users");
+        const userData = await setDoc(doc(db, "users", userCredential.user.uid),{ email: email, uid: userCredential.user.uid,role:role,firstName:firstName,lastName:lastName,locationSet:false,pfpSet:false }, "users");
         
         return userCredential.user;
     } catch (error) {
@@ -123,6 +123,29 @@ export async function getDocumentsByField(collectionName, fieldName, value) {
         console.error("Error getting documents:", error);
         throw error;
     }
+}
+
+export async function saveDriver(driverData) {
+  try {
+    await setDoc(doc(db, "drivers", driverData.uid), driverData);
+
+    console.log("Driver saved with UID:", driverData.uid);
+    return driverData.uid;
+  } catch (error) {
+    console.error("Error saving driver:", error);
+    throw error;
+  }
+}
+
+export async function getCollection(collectionName) {
+    const docs = [];
+  const querySnapshot = await getDocs(collection(db, collectionName));
+  querySnapshot.forEach((doc) => {
+    // doc.data() is the document data
+    // doc.id is the document ID
+    docs.push({ id: doc.id, ...doc.data() });
+  });
+  return docs;
 }
 
 export async function updateDocument(collectionName, docId, updatedData) {

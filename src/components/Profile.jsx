@@ -37,8 +37,12 @@ export default function Profile() {
                         setNavigateLocation("/driverform");
                         setShowIncompleteProfileModal(true);
                     }
+                    if(userData.locationSet === false && userData.pfpSet === false && userData.role === "Driver"){
+                        setMessage('Please complete your profile by uploading an image of yourself and providing a rough estimation of where you live. This will be used to show parents drivers.');
+                        setShowIncompleteProfileModal(true);
+                    }
                     else
-                    setMessage('Please complete your profile by uploading an image of yourself and providing a rough estimation of where you live. This will be used to show drivers nearby.');
+                    setMessage('Please complete your profile by uploading an image of yourself and providing a rough estimation of where you live. This will be used to show drivers near you.');
                     setShowIncompleteProfileModal(true);
                 }
             } catch (error) {

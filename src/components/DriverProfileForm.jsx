@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import MessageModal from "../modals/MessageModal.jsx";
 import schools from '../enums/Schools.json';
 import Select from 'react-select'
-import {saveDoc,getDocumentsByField,updateDocument} from '../firebase/firebase.js';
+import {saveDoc,getDocumentsByField,updateDocument, saveDriver} from '../firebase/firebase.js';
 
     const styles = {
         formArea: {
@@ -127,14 +127,14 @@ export default function DriverProfileForm(){
                 event.preventDefault();
         
                 try {
-                    await saveDoc({
+                    await saveDriver({
                         uid:userData.uid,
                         availableSeats: availableSeats,
                         vehicleCapacity: vehicleCapacity,
                         vehicleType: vehicleType,
                         supportedSchools: supportedSchools,
                         pricePerMonth: pricePerMonth,
-                    },"drivers");
+                    });
 
                     await getDocumentsByField("users","uid",userData.uid).then(async (res)=>{
                         const userDocId = res[0].id;
