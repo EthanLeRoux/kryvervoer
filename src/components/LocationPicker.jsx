@@ -6,6 +6,7 @@ import "leaflet/dist/leaflet.css";
 import "../assets/styles/MapWithPoints.css";
 import { updateDocument } from '../firebase/firebase.js';
 import MessageModal from "../modals/MessageModal.jsx";
+import { getCurrentUser, saveCurrentUser } from "../utils/sessionUser.js";
 
 // Component to handle map clicks
 function MapClickHandler({ onMapClick }) {
@@ -82,10 +83,9 @@ export default function LocationPicker({ onLocationChange }) {
         setIsSaving(true);
         try {
             // Get user ID from session storage
-            const userDataRaw = sessionStorage.getItem('userData');
-            const userData = userDataRaw ? JSON.parse(userDataRaw)[0] : null;
+            const userData = getCurrentUser();
 
-            if (!userData || !userData.id) {
+            if (!userData || !userData.uid) {
                 setModalMessage('Error: User not found');
                 setShowModal(true);
                 setIsSaving(false);
@@ -96,7 +96,7 @@ export default function LocationPicker({ onLocationChange }) {
             const address = await reverseGeocodeLocation(location.lat, location.lng);
 
             // Update database with location and address
-            await updateDocument('users', userData.id, {
+            await updateDocument('users', userData.uid, {
                 latitude: location.lat,
                 longitude: location.lng,
                 locationAddress: address,
@@ -108,7 +108,7 @@ export default function LocationPicker({ onLocationChange }) {
             
             // Update session storage
             const updatedUserData = { ...userData, latitude: location.lat, longitude: location.lng, locationAddress: address, locationSet:true };
-            sessionStorage.setItem('userData', JSON.stringify([updatedUserData]));
+            saveCurrentUser(updatedUserData);
             sessionStorage.setItem('selectedLocation', JSON.stringify(location));
 
             // Show success message then navigate after a short delay so modal is visible
