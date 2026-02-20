@@ -4,6 +4,7 @@ import '../assets/styles/App.css';
 import '../assets/styles/Profile.css';
 import { updateDocument } from '../firebase/firebase.js';
 import MessageModal from "../modals/MessageModal.jsx";
+import { getCurrentUser, saveCurrentUser } from "../utils/sessionUser.js";
 
 export default function Profile() {
     const [userData, setUserData] = useState(null);
@@ -14,19 +15,11 @@ export default function Profile() {
     const [navigateLocation, setNavigateLocation] = useState("");
 
     useEffect(() => {
-        const storedUserData = sessionStorage.getItem("userData");
-        
-        if (storedUserData) {
+        const currentUser = getCurrentUser();
+
+        if (currentUser) {
             try {
-                const parsedData = JSON.parse(storedUserData);
-                
-                const userData = parsedData[0];
-                
-                if (!userData) {
-                    console.error("No user data found at index 0");
-                    navigate("/login");
-                    return;
-                }
+                const userData = currentUser;
 
                 setUserData(userData);
                 
@@ -46,7 +39,7 @@ export default function Profile() {
                     setShowIncompleteProfileModal(true);
                 }
             } catch (error) {
-                console.error("Error parsing user data:", error);
+                console.error("Error loading user data:", error);
                 navigate("/login");
             }
         } else {
@@ -95,10 +88,10 @@ export default function Profile() {
                     setUserData(updatedUserData);
                     
                     // Update session storage
-                    sessionStorage.setItem("userData", JSON.stringify([updatedUserData]));
+                    saveCurrentUser(updatedUserData);
                     
                     // Update Firebase database
-                    await updateDocument("users", userData.id, { image64: base64, pfpSet: true });
+                    await updateDocument("users", userData.uid, { image64: base64, pfpSet: true });
                     
                     console.log('Profile picture updated successfully');
                     setMessage('Profile picture updated successfully!');

@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import MessageModal from "../modals/MessageModal.jsx";
 import { getDocumentsByField, loginUser } from "../firebase/firebase.js";
+import { saveCurrentUser } from "../utils/sessionUser.js";
 
 export default function Login() {
     const [userEmail, setUserEmail] = useState("");
@@ -28,7 +29,7 @@ export default function Login() {
                 return;
             }
 
-            sessionStorage.setItem("userData", JSON.stringify(realUserData));
+            saveCurrentUser(realUserData[0]);
             setMessage("Login successful!");
             setModalOpen(true);
             navigate('/profile');

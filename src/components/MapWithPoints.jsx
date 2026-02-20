@@ -4,11 +4,12 @@ import { useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import "../assets/styles/MapWithPoints.css";
 import {Tooltip} from 'react-leaflet/Tooltip';
-import {getDocumentsByField,getCollection} from '../firebase/firebase.js';
+import { getCollection } from '../firebase/firebase.js';
 import schools from "../enums/Schools.json";
 import languages from "../enums/Languages.json";
 import races from "../enums/Races.json";
 import Select from "react-select";
+import { getCurrentUser } from "../utils/sessionUser.js";
 
 export default function MapWithPoints() {
   const [selectedPoint, setSelectedPoint] = useState(null);
@@ -73,7 +74,16 @@ export default function MapWithPoints() {
   /* ---------------- ACTIONS ---------------- */
   const handleMessageDriver = () => {
     if (!selectedPoint) return;
-    const parentId = "Parent123";
+
+    const currentUser = getCurrentUser();
+    const parentId = currentUser?.uid;
+
+    if (!parentId) {
+      alert("Please log in to chat with a driver.");
+      navigate("/login");
+      return;
+    }
+
     navigate(`/messagedriver/${selectedPoint.id}/${parentId}`, {
       state: { role: "parent", userId: parentId },
     });
@@ -340,52 +350,3 @@ function DriverCard({ name, profilePic }) {
     </div>
   );
 }
-
-const styles = {
-container: {
-display: "flex",
-justifyContent: "center",
-width: "100%",
-maxWidth: "600px",
-margin: "0 auto",
-},
-scrollArea: {
-height: "500px", // 👈 controls how tall the scroll area is
-overflowY: "auto",
-paddingRight: "8px",
-width: "100%",
-},
-card: {
-backgroundColor: "#fff",
-borderRadius: "10px",
-boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-padding: "15px",
-marginBottom: "15px",
-},
-header: {
-display: "flex",
-justifyContent: "space-between",
-alignItems: "center",
-marginBottom: "5px",
-},
-name: {
-margin: 0,
-fontSize: "16px",
-fontWeight: "600",
-},
-driverId: {
-fontSize: "12px",
-color: "#888",
-},
-comment: {
-marginTop: "5px",
-fontSize: "14px",
-},
-timestamp: {
-display: "block",
-marginTop: "5px",
-fontSize: "12px",
-color: "#777",
-},
-
-};
