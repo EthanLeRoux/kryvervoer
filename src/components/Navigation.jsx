@@ -55,7 +55,7 @@ const Navigation = () => {
           <Link to="/privacy" className="nav-link">Privacy</Link>
           {userid ? (
             <div>
-              <button onClick={handleLogout} className="nav-link">Logout</button>
+              <div onClick={handleLogout} className="nav-link">Logout</div>
             </div>
           ) : <div />}
         </div>
