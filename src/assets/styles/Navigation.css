@@ -1,92 +1,123 @@
-/* Container */
+/* ===============================
+   BASE (Mobile First)
+================================= */
+
 .nav-container {
   background-color: #FFA500;
   border-bottom: 1px solid #eaeaea;
-  width: 100%;
-  padding: 0.75rem 2rem;
   position: sticky;
   top: 0;
-  z-index: 999;
+  z-index: 1000;
 }
 
-/* Flexbox layout for alignment */
+/* Layout */
 .nav-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 0.75rem 1.25rem;
+  position: relative;
 }
 
-/* Logo styling */
+/* Logo */
 .nav-logo-link {
   display: flex;
   align-items: center;
   text-decoration: none;
   color: #ffffff;
   font-weight: 700;
-  font-size: 1.25rem;
-  letter-spacing: 0.5px;
+  font-size: 1.2rem;
 }
 
 .nav-logo-icon {
   margin-right: 8px;
-  font-size: 2.5rem;
-  color: #ffffff;
 }
 
-/* Links container */
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
+/* ===============================
+   TOGGLE (Visible by default)
+================================= */
 
-.nav-link {
-  text-decoration: none;
-  color: #ffffff;
-  font-weight: 500;
-  transition: color 0.2s ease-in-out;
-}
-
-.nav-link:hover {
-  color: #007bff;
-}
-
-/* Toggle button (mobile) */
 .nav-toggle {
-  display: none;
   background: none;
   border: none;
   color: #ffffff;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   cursor: pointer;
+  display: block;
 }
 
-/* Responsive: collapse menu on small screens */
-@media (max-width: 800px) {
+/* ===============================
+   MOBILE MENU (Hidden by default)
+================================= */
+
+.nav-links {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+
+  display: none;
+  flex-direction: column;
+
+  background-color: #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.nav-links.active {
+  display: flex;
+}
+
+/* Mobile link style */
+.nav-link {
+  padding: 0.9rem 1rem;
+  text-decoration: none;
+  color: #333;
+  text-align: center;
+  border-bottom: 1px solid #f1f1f1;
+  transition: background 0.2s ease;
+}
+
+.nav-link:hover {
+  background-color: #f5f5f5;
+  color: #FFA500;
+}
+
+/* ===============================
+   DESKTOP (Enhancement)
+================================= */
+
+@media (min-width: 800px) {
+
+  .nav-content {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Hide toggle on desktop */
   .nav-toggle {
-    display: block;
-  }
-
-  .nav-links {
     display: none;
-    flex-direction: column;
-    background-color: #fff;
-    position: absolute;
-    top: 64px;
-    right: 0;
-    width: 100%;
-    padding: 1rem;
-    border-top: 1px solid #eee;
   }
 
-  .nav-links.active {
-    display: flex;
+  /* Desktop links */
+  .nav-links {
+    position: static;
+    display: flex !important;
+    flex-direction: row;
+    margin-left: auto; /* 🔥 pushes links to the right */
+    background: none;
+    box-shadow: none;
+    gap: 1.5rem;
   }
 
   .nav-link {
-    padding: 0.75rem 0;
-    text-align: center;
+    border: none;
+    padding: 0;
+    color: #ffffff;
+    font-weight: 500;
+  }
+
+  .nav-link:hover {
+    background: none;
+    color: #007bff;
   }
 }
