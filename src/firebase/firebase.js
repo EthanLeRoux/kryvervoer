@@ -25,7 +25,16 @@ export const auth = getAuth(app); // Export auth so other components can use it
 export async function signUpUser(email, password,role,firstName,lastName) {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const userData = await setDoc(doc(db, "users", userCredential.user.uid),{ email: email, uid: userCredential.user.uid,role:role,firstName:firstName,lastName:lastName,locationSet:false,pfpSet:false }, "users");
+        await setDoc(doc(db, "users", userCredential.user.uid), {
+            email,
+            uid: userCredential.user.uid,
+            role,
+            firstName,
+            lastName,
+            locationSet: false,
+            pfpSet: false,
+            driverProfileSet: false,
+        });
         
         return userCredential.user;
     } catch (error) {

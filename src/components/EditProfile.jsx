@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import '../assets/styles/App.css';
 import '../assets/styles/EditProfile.css';
 import { updateDocument } from '../firebase/firebase.js';
+import { getCurrentUser, saveCurrentUser } from "../utils/sessionUser.js";
 
 export default function EditProfile() {
     const [userData, setUserData] = useState(null);
@@ -11,16 +12,9 @@ export default function EditProfile() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const storedUserData = sessionStorage.getItem("userData");
-        if (storedUserData) {
-            try {
-                const parsedData = JSON.parse(storedUserData);
-                const userData = Array.isArray(parsedData) ? parsedData[0] : parsedData;
-                setUserData(userData);
-            } catch (error) {
-                console.error("Error parsing user data:", error);
-                navigate("/login");
-            }
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+            setUserData(currentUser);
         } else {
             navigate("/login");
         }
@@ -43,8 +37,8 @@ export default function EditProfile() {
                     const base64 = await convertToBase64(file);
                     const updatedUserData = { ...userData, image64: base64 };
                     setUserData(updatedUserData);
-                    sessionStorage.setItem("userData", JSON.stringify([updatedUserData]));
-                    await updateDocument("user-data", userData.id, { image64: base64 });
+                    saveCurrentUser(updatedUserData);
+                    await updateDocument("users", userData.uid, { image64: base64 });
                     alert('Profile picture updated successfully!');
                 } catch (error) {
                     console.error('Error updating profile picture:', error);
@@ -76,13 +70,13 @@ export default function EditProfile() {
             console.log("Saving profile changes...");
             
             // Update Firebase database
-            await updateDocument("user-data", userData.id, {
+            await updateDocument("users", userData.uid, {
                 firstName: userData.firstName,
                 lastName: userData.lastName
             });
             
             // Update session storage
-            sessionStorage.setItem("userData", JSON.stringify([userData]));
+            saveCurrentUser(userData);
             
             console.log("Profile updated successfully");
             alert("Profile updated successfully!");
@@ -161,7 +155,7 @@ export default function EditProfile() {
                             <label className="formLabel">Email:</label>
                             <input 
                                 type="email" 
-                                value={userData.emailAddress || ''} 
+                                value={userData.email || ''} 
                                 disabled
                                 className="formInput"
                             />
