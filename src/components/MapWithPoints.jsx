@@ -5,10 +5,54 @@ import "leaflet/dist/leaflet.css";
 import "../assets/styles/MapWithPoints.css";
 import {Tooltip} from 'react-leaflet/Tooltip';
 import {getDocumentsByField,getCollection} from '../firebase/firebase.js';
-import schools from "../enums/Schools.json";
-import languages from "../enums/Languages.json";
-import races from "../enums/Races.json";
-import Select from "react-select";
+
+const styles = {
+container: {
+display: "flex",
+justifyContent: "center",
+width: "100%",
+maxWidth: "600px",
+margin: "0 auto",
+},
+scrollArea: {
+height: "500px", // 👈 controls how tall the scroll area is
+overflowY: "auto",
+paddingRight: "8px",
+width: "100%",
+},
+card: {
+backgroundColor: "#fff",
+borderRadius: "10px",
+boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+padding: "15px",
+marginBottom: "15px",
+},
+header: {
+display: "flex",
+justifyContent: "space-between",
+alignItems: "center",
+marginBottom: "5px",
+},
+name: {
+margin: 0,
+fontSize: "16px",
+fontWeight: "600",
+},
+driverId: {
+fontSize: "12px",
+color: "#888",
+},
+comment: {
+marginTop: "5px",
+fontSize: "14px",
+},
+timestamp: {
+display: "block",
+marginTop: "5px",
+fontSize: "12px",
+color: "#777",
+},
+};
 
 export default function MapWithPoints() {
   const [selectedPoint, setSelectedPoint] = useState(null);
@@ -45,8 +89,6 @@ export default function MapWithPoints() {
               max_passengers: driver.vehicleCapacity,
               available_seats: driver.availableSeats,
               price: driver.pricePerMonth,
-              race:driver.race,
-              languages: driver.languages || []
             };
           })
           .filter(Boolean);
@@ -87,37 +129,21 @@ export default function MapWithPoints() {
   };
 
   /* ---------------- FILTERING ---------------- */
- const filteredPoints = points.filter((point) => {
-  return Object.entries(appliedFilters).every(([key, value]) => {
-    if (!value || (Array.isArray(value) && value.length === 0)) return true;
+  const filteredPoints = points.filter((point) => {
+    return Object.entries(appliedFilters).every(([key, value]) => {
+      if (!value) return true;
+      const pointValue = point[key];
 
-    const pointValue = point[key];
-
-    // If point value is an array (e.g., supported schools or languages)
-    if (Array.isArray(pointValue)) {
-      if (Array.isArray(value)) {
-        // Check if any filter value exists in pointValue
-        return value.some((filterVal) =>
-          pointValue.some((v) => v.toLowerCase() === filterVal.toLowerCase())
-        );
-      } else {
+      if (Array.isArray(pointValue)) {
         return pointValue.some((v) =>
           v.toLowerCase().includes(value.toLowerCase())
         );
       }
-    }
-
-    // Point value is a string/number
-    if (Array.isArray(value)) {
-      return value.some((v) =>
-        String(pointValue).toLowerCase().includes(v.toLowerCase())
-      );
-    } else {
-      return String(pointValue).toLowerCase().includes(value.toLowerCase());
-    }
+      return String(pointValue)
+        .toLowerCase()
+        .includes(value.toLowerCase());
+    });
   });
-});
-
 
   const buttonStyle = {
     marginTop: "0.5rem",
@@ -135,7 +161,7 @@ export default function MapWithPoints() {
       <FilterBar
         filters={filters}
         setFilters={setFilters}
-         onApply={(newFilters) => setAppliedFilters(newFilters || filters)}
+        onApply={() => setAppliedFilters(filters)}
       />
 
       <div style={{ display: "flex", gap: "1rem" }}>
@@ -204,9 +230,8 @@ export default function MapWithPoints() {
               <p><strong>Vehicle Capacity:</strong> {selectedPoint.max_passengers}</p>
               <p><strong>Available Seats:</strong> {selectedPoint.available_seats}</p>
               <p><strong>Price per month:</strong> R{selectedPoint.price}</p>
-              <p><strong>Race:</strong> {selectedPoint.race}</p>
-              <p><strong>Languages:</strong> {selectedPoint.languages.join(", ")}</p>
-              
+              {/* <p><strong>Latitude:</strong> {selectedPoint.lat}</p>
+              <p><strong>Longitude:</strong> {selectedPoint.lng}</p> */}
 
               <button onClick={handleMessageDriver} style={buttonStyle}>
                 Message Driver
@@ -230,102 +255,23 @@ function FilterBar({ filters, setFilters, onApply }) {
   const handleChange = (field, value) =>
     setFilters((prev) => ({ ...prev, [field]: value }));
 
-  const handleReset = () => {
-    setFilters({});
-     onApply({});
-    };
-
-  //convert JSON arrays to react-select options
-  const toOptions = (arr) => arr.map((item) => ({ label: item, value: item }));
-
-  // vehicle types
-  const vehicleOptions = [
-    { label: "Sedan", value: "Sedan" },
-    { label: "SUV", value: "SUV" },
-    { label: "Minibus", value: "Minibus" },
-  ];
-
-  const selectStyles = {
-    container: (base) => ({ ...base, minWidth: 150 }),
-    menuPortal: (base) => ({ ...base, zIndex: 9999 }), // dropdown above map
-  };
-
   return (
-    <div className="filterBar">
-      {/* Vehicle */}
-      <Select
-        isMulti
-        placeholder="VEHICLE"
-        options={vehicleOptions}
-        value={filters.vehicle ? { label: filters.vehicle, value: filters.vehicle } : null}
-        onChange={(selected) => handleChange("vehicle", selected?.value || "")}
-        menuPortalTarget={document.body}
-        menuPosition="fixed"
-        styles={selectStyles}
-      />
-
-      {/* Schools multi-select */}
-      <Select
-        isMulti
-        placeholder="SCHOOLS"
-        options={toOptions(schools)}
-        value={filters.schools?.map((s) => ({ label: s, value: s })) || []}
-        onChange={(selected) =>
-          handleChange("schools", selected ? selected.map((s) => s.value) : [])
-        }
-        menuPortalTarget={document.body}
-        menuPosition="fixed"
-        styles={selectStyles}
-      />
-
-      {/* Languages single-select */}
-      <Select
-        isMulti
-        placeholder="LANGUAGE"
-        options={toOptions(languages)}
-        value={filters.languages?.map((l) => ({ label: l, value: l })) || []}
-        onChange={(selected) =>
-          handleChange("languages", selected ? selected.map((l) => l.value) : [])
-        }
-        menuPortalTarget={document.body}
-        menuPosition="fixed"
-        styles={selectStyles}
-      />
-
-      {/* Races single-select */}
-      <Select
-        placeholder="RACE"
-        options={toOptions(races)}
-        value={filters.race ? { label: filters.race, value: filters.race } : null}
-        onChange={(selected) => handleChange("race", selected?.value || "")}
-        menuPortalTarget={document.body}
-        menuPosition="fixed"
-        styles={selectStyles}
-      />
-
-      {/* Max passengers */}
-      <input
-        type="number"
-        placeholder="MAX PASSENGERS"
-        value={filters.max_passengers || ""}
-        onChange={(e) => handleChange("max_passengers", e.target.value)}
-      />
-
-      {/* Available seats */}
-      <input
-        type="number"
-        placeholder="AVAILABLE SEATS"
-        value={filters.available_seats || ""}
-        onChange={(e) => handleChange("available_seats", e.target.value)}
-      />
-
-      {/* Buttons */}
+    <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+      {["vehicle", "schools", "max_passengers", "available_seats"].map(
+        (field) => (
+          <input
+            key={field}
+            type="text"
+            placeholder={field.replace("_", " ").toUpperCase()}
+            value={filters[field] || ""}
+            onChange={(e) => handleChange(field, e.target.value)}
+          />
+        )
+      )}
       <button onClick={onApply}>Filter</button>
-      <button onClick={handleReset}>Reset</button>
     </div>
   );
 }
-
 
 /* ---------------- DRIVER CARD ---------------- */
 function DriverCard({ name, profilePic }) {
@@ -341,51 +287,3 @@ function DriverCard({ name, profilePic }) {
   );
 }
 
-const styles = {
-container: {
-display: "flex",
-justifyContent: "center",
-width: "100%",
-maxWidth: "600px",
-margin: "0 auto",
-},
-scrollArea: {
-height: "500px", // 👈 controls how tall the scroll area is
-overflowY: "auto",
-paddingRight: "8px",
-width: "100%",
-},
-card: {
-backgroundColor: "#fff",
-borderRadius: "10px",
-boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
-padding: "15px",
-marginBottom: "15px",
-},
-header: {
-display: "flex",
-justifyContent: "space-between",
-alignItems: "center",
-marginBottom: "5px",
-},
-name: {
-margin: 0,
-fontSize: "16px",
-fontWeight: "600",
-},
-driverId: {
-fontSize: "12px",
-color: "#888",
-},
-comment: {
-marginTop: "5px",
-fontSize: "14px",
-},
-timestamp: {
-display: "block",
-marginTop: "5px",
-fontSize: "12px",
-color: "#777",
-},
-
-};
